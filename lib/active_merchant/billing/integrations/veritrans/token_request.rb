@@ -27,6 +27,7 @@ module ActiveMerchant #:nodoc:
             end
             if error_response
               @errors   = error_response[:errors]
+              raise StandardError.new @errors
             end
           end
 
