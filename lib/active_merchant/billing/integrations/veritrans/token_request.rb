@@ -47,10 +47,15 @@ module ActiveMerchant #:nodoc:
           private
           def build_post_data 
             _pd = PostData.new
-            @fields.each{|key, value| _pd[key] = value}
+            @fields.each{|key, value| _pd[key] = key =~ /PHONE/ ? sanitize_phone(value) : value   }
             _pd
 
           end
+
+          def sanitize_phone _phone
+            _phone.gsub(/\D/, '')
+          end
+
         end
       end
     end
