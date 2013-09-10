@@ -30,7 +30,7 @@ module ActiveMerchant #:nodoc:
            @fields['SHIPPING_FLAG'] =  _bool == true ? '1' : '0'
           end
           def add_field(name, value)
-            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' if  name.to_s =~ /[^SHIPPING_FLAG|SHIPPING_]/ and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
+            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' if  name.to_s =~ /SHIPPING_/ and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
             super
           end          
           
@@ -50,12 +50,12 @@ module ActiveMerchant #:nodoc:
           mapping :customer,  :first_name      => 'FIRST_NAME',
                               :last_name       => 'LAST_NAME',
                               :address_1       => 'ADDRESS1',
-                              :address_2       => 'ADDRESS1',
+                              :address_2       => 'ADDRESS2',
                               :city            => 'CITY',
                               :country_code    => 'COUNTRY_CODE',
-                              :postal_code     => 'POSTAL_CODE',
-                              :phone           => 'PHONE'
-
+                              :zip             => 'POSTAL_CODE',
+                              :phone           => 'PHONE',
+                              :email           => 'EMAIL'
 
           mapping :shipping,  :first_name      => 'SHIPPING_FIRST_NAME',
                               :last_name       => 'SHIPPING_LAST_NAME',
@@ -63,7 +63,7 @@ module ActiveMerchant #:nodoc:
                               :address_2       => 'SHIPPING_ADDRESS2',
                               :city            => 'SHIPPING_CITY',
                               :country_code    => 'SHIPPING_COUNTRY_CODE',
-                              :postal_code     => 'SHIPPING_POSTAL_CODE',
+                              :zip             => 'SHIPPING_POSTAL_CODE',
                               :phone           => 'SHIPPING_PHONE'
        
           private
