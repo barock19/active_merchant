@@ -11,6 +11,7 @@ module ActiveMerchant #:nodoc:
             super
             add_field 'SHIPPING_FLAG', '0'
             add_field 'CUSTOMER_SPECIFICATION_FLAG', '0'
+            add_field 'SESSION_ID',  SecureRandom.hex(13)
           end
 
           def form_fields
