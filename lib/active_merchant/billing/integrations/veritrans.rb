@@ -1,6 +1,5 @@
 require File.dirname(__FILE__) + '/veritrans/token_request.rb'
 require File.dirname(__FILE__) + '/veritrans/commodities.rb'
-require File.dirname(__FILE__) + '/veritrans/common.rb'
 require File.dirname(__FILE__) + '/veritrans/helper.rb'
 require File.dirname(__FILE__) + '/veritrans/notification.rb'
 
