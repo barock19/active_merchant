@@ -4,17 +4,10 @@ module ActiveMerchant #:nodoc:
       module Veritrans
         class Helper < ActiveMerchant::Billing::Integrations::Helper
           class_attribute :item_keys 
-          self.item_keys =  { :id       => 'COMMODITY_ID',
-                              :price    => 'COMMODITY_PRICE',
-                              :qty      => 'COMMODITY_QTY',
-                              :name     => 'COMMODITY_NAME1',
-                              :name_en  => 'COMMODITY_NAME2' }
-
           def initialize order, account , options = {}
             @order    = order
             @mid      = account
             @mhaskey  = options.delete(:merchant_hash_key)
-            @items = []
             super
             add_field 'SHIPPING_FLAG', '0'
             add_field 'CUSTOMER_SPECIFICATION_FLAG', '0'
@@ -41,7 +34,7 @@ module ActiveMerchant #:nodoc:
           end          
           
           def items
-            @items ||= Commodities.new
+            @items ||= Comodities.new
           end
 
           mapping :amount,          'GROSS_AMOUNT'
