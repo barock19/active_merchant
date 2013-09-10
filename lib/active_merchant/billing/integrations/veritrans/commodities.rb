@@ -4,9 +4,9 @@ module ActiveMerchant #:nodoc:
       module Veritrans
         class Comodities
 					include Enumerable
-					@@item_keys = { :id       => 'COMMODITY_ID',
-                         :price    => 'COMMODITY_PRICE',
-                         :qty      => 'COMMODITY_QTY',
+					@@item_keys = { :id      => 'COMMODITY_ID',
+                         :price    => 'COMMODITY_UNIT',
+                         :qty      => 'COMMODITY_NUM',
                          :name     => 'COMMODITY_NAME1',
                          :name_en  => 'COMMODITY_NAME2' }
 					def initialize
