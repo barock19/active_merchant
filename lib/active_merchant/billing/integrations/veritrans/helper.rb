@@ -9,10 +9,10 @@ module ActiveMerchant #:nodoc:
             @mid      = account
             @mhaskey  = options.delete(:merchant_hash_key)
             super
-            add_field 'SHIPPING_FLAG', '0'
-            add_field 'CUSTOMER_SPECIFICATION_FLAG', '0'
+            @fields['SHIPPING_FLAG']               = '0'
+            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '0'
             add_field 'SESSION_ID',  SecureRandom.hex(13)
-            self.settlement_type = '00'
+            self.settlement_type = '01'
           end
 
           def form_fields
@@ -29,10 +29,8 @@ module ActiveMerchant #:nodoc:
           def shipping_required= _bool
            @fields['SHIPPING_FLAG'] =  _bool == true ? '1' : '0'
           end
-
           def add_field(name, value)
-            @fields['SHIPPING_FLAG'] = '1' if name.to_s =~ /SHIPPING_/ and @fields['SHIPPING_FLAG'].to_i == 0
-            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' if  name.to_s =~ /SHIPPING_/ and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
+            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' if  name.to_s =~ /[^SHIPPING_FLAG|SHIPPING_]/ and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
             super
           end          
           
@@ -72,7 +70,7 @@ module ActiveMerchant #:nodoc:
 
           def merchanthash
             if @merchanthash.blank?
-              _settlement_type  = @fields['SETTLEMENT_TYPE'] || '00'
+              _settlement_type  = @fields['SETTLEMENT_TYPE']
               _amount           = @fields['GROSS_AMOUNT']
               @merchanthash = Digest::SHA512.hexdigest "#{@mhaskey},#{@mid},#{_settlement_type},#{@order},#{_amount}"
             end
