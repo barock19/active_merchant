@@ -32,6 +32,7 @@ module ActiveMerchant #:nodoc:
 
           def add_field(name, value)
             @fields['SHIPPING_FLAG'] = '1' if name.to_s =~ /SHIPPING_/ and @fields['SHIPPING_FLAG'].to_i == 0
+            @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' if  name.to_s =~ /SHIPPING_/ and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
             super
           end          
           
