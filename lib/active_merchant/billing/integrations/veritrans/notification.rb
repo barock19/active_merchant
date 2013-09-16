@@ -5,95 +5,85 @@ module ActiveMerchant #:nodoc:
     module Integrations #:nodoc:
       module Veritrans
         class Notification < ActiveMerchant::Billing::Integrations::Notification
+          include PostsData
+
+          attr_reader :acknowledge_response
+          def initialize post, options = {}
+            super
+            @acknowledge_response = {}
+            early_acknowledge 
+          end
+          
           def complete?
-            params['']
+            %w{success failure pending}.include?status 
           end
 
           def item_id
-            params['']
+            params['TOKEN_MERCHANT'] || ""
           end
 
           def transaction_id
-            params['']
+            params['orderId']
           end
 
+          def currency
+            'IDR'
+          end
           # When was this payment received by the client.
           def received_at
-            params['']
+            acknowledge_response['last_mod_datetime']
           end
 
           def payer_email
-            params['']
+            receiver_email
           end
 
           def receiver_email
-            params['']
+            params['email'] || ""
           end
 
           def security_key
-            params['']
+            params['vResultCode'] || ""
           end
 
           # the money amount we received in X.2 decimal.
           def gross
-            params['']
+            '%.2f' % (acknowledge_response['total_amount'] || 0)
           end
 
           # Was this a test transaction?
           def test?
-            params[''] == 'test'
+            acknowledge_response['merchant_id'] =~ /^T/ ? true : false
           end
 
           def status
-            params['']
+            params['mStatus'].downcase || ""
           end
 
-          # Acknowledge the transaction to Veritrans. This method has to be called after a new
-          # apc arrives. Veritrans will verify that all the information we received are correct and will return a
-          # ok or a fail.
-          #
-          # Example:
-          #
-          #   def ipn
-          #     notify = VeritransNotification.new(request.raw_post)
-          #
-          #     if notify.acknowledge
-          #       ... process order ... if notify.complete?
-          #     else
-          #       ... log possible hacking attempt ...
-          #     end
+          def process_result
+            params['mStatus'] || ''
+          end
+
           def acknowledge
-            payload = raw
-
-            uri = URI.parse(Veritrans.notification_confirmation_url)
-
-            request = Net::HTTP::Post.new(uri.path)
-
-            request['Content-Length'] = "#{payload.size}"
-            request['User-Agent'] = "Active Merchant -- http://home.leetsoft.com/am"
-            request['Content-Type'] = "application/x-www-form-urlencoded"
-
-            http = Net::HTTP.new(uri.host, uri.port)
-            http.verify_mode    = OpenSSL::SSL::VERIFY_NONE unless @ssl_strict
-            http.use_ssl        = true
-
-            response = http.request(request, payload)
-
-            # Replace with the appropriate codes
-            raise StandardError.new("Faulty Veritrans result: #{response.body}") unless ["AUTHORISED", "DECLINED"].include?(response.body)
-            response.body == "AUTHORISED"
+            raise @early_acknowledge_error unless @early_acknowledge_error.nil?
+            valid_status = %{authorize settlement pending reversal cancel deny verify signature}
+            raise StandardError.new("Faulty Veritrans result : #{ @acknowledge_body }") unless %w{verified unverified}.include?(acknowledge_response['acknowledge'])
+            acknowledge_response['acknowledge'] == 'verified'
           end
+
 
           private
-
-          # Take the posted data and move the relevant data into a hash
-          def parse(post)
-            @raw = post.to_s
-            for line in @raw.split('&')
-              key, value = *line.scan( %r{^([A-Za-z0-9_.]+)\=(.*)$} ).flatten
-              params[key] = CGI.unescape(value)
+          
+          def early_acknowledge
+            begin
+              response = ssl_get Veritrans.acknowledge_url + "/#{params['orderId']}"
+              @acknowledge_body = response
+              @acknowledge_response = JSON.parse(response)
+            rescue Exception => e
+              @early_acknowledge_error = e
             end
           end
+
         end
       end
     end

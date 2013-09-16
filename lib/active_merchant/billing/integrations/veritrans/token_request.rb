@@ -13,6 +13,7 @@ module ActiveMerchant #:nodoc:
           end
           
           def commit
+            Rails.logger.info "Commit Token #{post_data}"
             main_params = post_data.to_query
             commodity_params = @commodities.collect{|commodity| _pd = PostData.new ; commodity.each{|key, value| _pd[key] = value} ; _pd.to_query }.join("&")
             uri           = URI.parse(Veritrans.token_url)
@@ -47,13 +48,16 @@ module ActiveMerchant #:nodoc:
           private
           def build_post_data 
             _pd = PostData.new
-            @fields.each{|key, value| _pd[key] = key =~ /PHONE/ ? sanitize_phone(value) : value   }
+            @fields.each{|key, value| _pd[key] = key =~ /PHONE/ ? sanitize_phone(value) : key =~ /ADDRESS/ ?  sanitize_address(value) : value }
             _pd
-
           end
 
           def sanitize_phone _phone
-            _phone.gsub(/\D/, '')
+            _phone.strip.gsub(/\D/, '')
+          end
+
+          def sanitize_address _address
+            _address.gsub(/\,/, '').strip.first(30)
           end
 
         end
