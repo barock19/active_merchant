@@ -71,12 +71,13 @@ module ActiveMerchant #:nodoc:
             acknowledge_response['acknowledge'] == 'verified'
           end
 
-
           private
-          
+          def build_autorization
+            'Basic ' + ["#{@options[:merchant_id]}:#{@options[:merchant_hash_key]}"].pack('m').delete("\r\n")
+          end
           def early_acknowledge
             begin
-              response = ssl_get Veritrans.acknowledge_url + "/#{params['orderId']}"
+              response = ssl_get Veritrans.acknowledge_url + "/#{params['orderId']}", {'Authorization' => build_autorization}
               @acknowledge_body = response
               @acknowledge_response = JSON.parse(response)
             rescue Exception => e

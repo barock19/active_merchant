@@ -5,7 +5,7 @@ class VeritransNotificationTest < Test::Unit::TestCase
   include ActiveMerchant::Billing::Integrations
 
   def setup
-    @veritrans = Veritrans::Notification.new(http_raw_data)
+    @veritrans = Veritrans::Notification.new(http_raw_data, :merchant_id => 'T1000000000000000000', :merchant_has_key=> 'asdhjada-dasdahsvd-adasds')
     @veritrans.stubs(:acknowledge_response).returns(acknowledge_response)
   end
 
@@ -26,9 +26,9 @@ class VeritransNotificationTest < Test::Unit::TestCase
   end
 
   def test_send_acknowledgement
-    
-    Veritrans::Notification.any_instance.expects(:ssl_get).with("#{Veritrans.acknowledge_url}/#{acknowledge_response['order_id']}").returns(acknowledge_response.to_json)
-    notification =Veritrans::Notification.new("mStatus=Success&orderId=#{acknowledge_response['order_id']}")
+    auth_header = {'Authorization' => 'Basic ' + ["T1000000000000000000:asdhjada-dasdahsvd-adasds"].pack('m').delete("\r\n")}
+    Veritrans::Notification.any_instance.expects(:ssl_get).with("#{Veritrans.acknowledge_url}/#{acknowledge_response['order_id']}", auth_header).returns(acknowledge_response.to_json)
+    notification =Veritrans::Notification.new("mStatus=Success&orderId=#{acknowledge_response['order_id']}", :merchant_id => 'T1000000000000000000', :merchant_hash_key =>"asdhjada-dasdahsvd-adasds")
     notification.stubs(:acknowledge_response).returns(acknowledge_response)
     assert notification.acknowledge
   end
