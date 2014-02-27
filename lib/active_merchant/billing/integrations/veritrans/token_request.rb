@@ -11,7 +11,7 @@ module ActiveMerchant #:nodoc:
             @fields = _fields
             @commodities = _commodities
           end
-          
+
           def commit
             main_params = post_data.to_query
             commodity_params = @commodities.collect{|commodity| _pd = PostData.new ; commodity.each{|key, value| _pd[key] = value} ; _pd.to_query }.join("&")
@@ -45,14 +45,18 @@ module ActiveMerchant #:nodoc:
           end
 
           private
-          def build_post_data 
+          def build_post_data
             _pd = PostData.new
-            @fields.each{|key, value| _pd[key] = key =~ /PHONE/ ? sanitize_phone(value) : key =~ /ADDRESS/ ?  sanitize_address(value) : value }
+            @fields.each{|key, value| _pd[key] = key =~ /PHONE/ ? sanitize_phone(value) : key =~ /ADDRESS/ ?  sanitize_address(value) : key =~ /CITY/i ? sanitize_city(value)  : value  }
             _pd
           end
 
           def sanitize_phone _phone
             _phone.strip.gsub(/\D/, '')
+          end
+
+          def sanitize_city _city
+            sanitize_address(_city).first(20)
           end
 
           def sanitize_address _address
