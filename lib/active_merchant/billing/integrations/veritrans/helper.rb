@@ -3,7 +3,7 @@ module ActiveMerchant #:nodoc:
     module Integrations #:nodoc:
       module Veritrans
         class Helper < ActiveMerchant::Billing::Integrations::Helper
-          class_attribute :item_keys 
+          class_attribute :item_keys
           def initialize order, account , options = {}
             @order    = order
             @mid      = account
@@ -23,15 +23,17 @@ module ActiveMerchant #:nodoc:
           end
 
           def shipping_same_as_billing= _bool
-            add_field 'CUSTOMER_SPECIFICATION_FLAG' , _bool == true ? 0 : 1  
+            add_field 'CUSTOMER_SPECIFICATION_FLAG' , _bool == true ? 0 : 1
           end
-
+          def enable3dsecure= _bool
+            add_field 'ENABLE_3D_SECURE', _bool == true ? 1 : 0
+          end
           def shipping_required= _bool
             @fields['SHIPPING_FLAG'] =  _bool == true ? '1' : '0'
           end
           def add_field(name, value)
             if  name.to_s.match(/^SHIPPING_/) and @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 0
-              @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1' 
+              @fields['CUSTOMER_SPECIFICATION_FLAG'] = '1'
             end
 
             if @fields['CUSTOMER_SPECIFICATION_FLAG'].to_i == 1 and @fields['SHIPPING_FLAG'].to_i == 0
@@ -39,8 +41,8 @@ module ActiveMerchant #:nodoc:
             end
 
             super
-          end          
-          
+          end
+
           def items
             @items ||= Comodities.new
           end
@@ -49,8 +51,8 @@ module ActiveMerchant #:nodoc:
           mapping :order,           'ORDER_ID'
           mapping :account,         'MERCHANT_ID'
           mapping :return_url,      'FINISH_PAYMENT_RETURN_URL'
-          mapping :cancel_url,      'UNFINISH_PAYMENT_RETURN_URL' 
-          mapping :error_url,       'ERROR_PAYMENT_RETURN_URL' 
+          mapping :cancel_url,      'UNFINISH_PAYMENT_RETURN_URL'
+          mapping :error_url,       'ERROR_PAYMENT_RETURN_URL'
           mapping :settlement_type, 'SETTLEMENT_TYPE'
           mapping :amount,          'GROSS_AMOUNT'
 
@@ -72,7 +74,7 @@ module ActiveMerchant #:nodoc:
                               :country_code    => 'SHIPPING_COUNTRY_CODE',
                               :zip             => 'SHIPPING_POSTAL_CODE',
                               :phone           => 'SHIPPING_PHONE'
-       
+
           private
 
           def merchanthash
